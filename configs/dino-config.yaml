@@ -1,0 +1,216 @@
+data:
+  dimensionality: 2D # 2D/ #not implemented: 2D+T, 3D, 3D+T
+  target_pixdim:
+  - 1.25
+  - 1.25
+  target_size:
+  - 256
+  - 256
+  image_grid_sample_mode: bicubic
+  label_grid_sample_mode: nearest
+  translate_to_center: True
+
+  nr_sample_copies: 0 # number of copies of the same image with different augmentations
+
+  to_one_hot:
+    active: True
+    nr_classes: 4
+
+  augmentation:
+    translation:
+      prob: 1.0
+      range:
+      - -40.0
+      - 40.0
+    
+    rotation:
+      prob: 1.0
+      range:
+      - -180.0
+      - 180.0
+    
+    scale:
+      prob: 1.0
+      range:
+      - 0.7
+      - 1.4
+      linked: True
+      
+    flip_prob:
+    - 0.5
+    - 0.5
+    
+    gaussian_noise:
+      prob: 0.15
+      mean: 0.0
+      std: 0.2
+    
+    gaussian_smooth:
+      prob: 0.1
+      sigma_x:
+      - 0.5
+      - 1.5
+      sigma_y:
+      - 0.5
+      - 1.5
+    
+    scale_intensity:
+      prob: 0.2
+      factors:
+      - 0.6
+      - 1.5
+    
+    shift_intensity:
+      prob: 0.15
+      offsets:
+      - -0.4
+      - 0.4
+    
+    adjust_contrast:
+      prob: 0.15
+      gamma:
+      - 0.7
+      - 1.5
+
+  intensity:
+    normalization_mode: standardize # standardize/normalize
+    reference_level: subject # subject/image
+    normalize:      
+      target_min: -1.0
+      target_max: 1.0
+      source_min: None
+      source_max: None
+    clamp:
+      active: False
+      min_intensity: None
+      max_intensity: None
+
+# overwrite values of "data" above for global crop, potentailly blurred more
+global_data_update_blur: 
+  augmentation:
+    gaussian_smooth:
+      prob: 1.0      
+      sigma_x:
+      - 0.1
+      - 2.0
+      sigma_y:
+      - 0.1
+      - 2.0
+    scale:
+      range:
+      - 0.524  # sqrt(0.14) * 1.4
+      - 1.400  # sqrt(1.00) * 1.4
+
+# overwrite values of "data" above for local crop, potentially solarized
+global_data_update_solarize: 
+  augmentation:
+    solarization:
+      prob: 0.2
+      threshold: 0.0
+    scale:
+      range:
+      - 0.524  # sqrt(0.14) * 1.4
+      - 1.400  # sqrt(1.00) * 1.4
+
+# overwrite values of "data" above for local crops
+local_data_update: 
+  target_size:
+    - 128
+    - 128
+
+  nr_sample_copies: 5 # number of copies of the same image with different augmentations
+
+  augmentation:
+    translation:
+      range:
+      - -160.0
+      - 160.0
+    scale:
+      range:
+      - 0.313  # sqrt(0.05) * 1.4
+      - 0.524  # sqrt(0.14) * 1.4
+
+
+dataset:
+  split_file: default-cine-split.yaml
+  subsets:
+  - mm1       # possible keys: sa_cine/sa_cine_gt
+  - mm2       # possible keys: sa_cine/sa_cine_gt (la_cine/la_cine_gt)  
+  key_pairs:
+  - [sa_cine, sa_cine_gt]
+  # key pairs indicate file names and output dict keys, applied to all used datasets:
+  # - [sa_cine, sa_cine_gt]         # images and labels
+  # - [sa_cine, none]               # only images
+  # - [none, sa_cine_gt]            # only labels 
+  meta_only_labels: True # only use label keys for meta data
+  special_mode: None # ed_only, es_only # allows for only using ED or ES timeframes
+  valid_partition: 0.2
+  valid_split_seed: 0
+  train_weighted_sampling_columns: None  
+
+
+dataloader:
+  train:
+    batch_size: 64
+    drop_last: True
+    shuffle: True
+    augmentation: True
+
+
+encoder:
+  nr_image_channels: 1
+  channels_list:
+  - 32
+  - 64
+  - 128
+  - 256
+  - 512
+  - 512
+  - 512  
+dino_head:
+  out_dim: 8192 # 65536
+  use_bn: True
+  student_norm_last_layer: True
+
+
+loss:
+  student_temperature: 0.1
+  teacher_temperature: 0.04
+  teacher_temp_warmup_start: 0.02
+  teacher_temp_warmup_epochs: 30
+  center_momentum: 0.9
+
+
+optimizer:
+  learning_rate: 0.03
+  min_learning_rate: 0.000001
+  warmup_epochs: 10
+  weight_decay: 0.0001
+  weight_decay_end: 0.0001
+  momentum: 0.9
+  momentum_teacher: 0.996
+  nesterov: False
+
+
+training:
+  max_nr_epochs: 100
+  mixed_precision: True
+  freeze_last_layer: 1
+
+
+experiment:
+  project: self-supervised_pretraining_cine
+  name: dino
+  type: train # train/test
+  seed: 0
+
+
+general:
+  num_workers: 16
+  persistent_workers: True
+  verbosity: 1
+
+
+paths:
+  data: "/home/bme001/shared/qcardia/data"
+  
