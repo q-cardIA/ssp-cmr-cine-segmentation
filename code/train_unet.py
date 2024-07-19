@@ -171,7 +171,7 @@ def main():
             min_delta=wandb.config["training"]["early_stopping"]["min_delta"],
         )
 
-    # get key pairs -> get first key pair for now, TODO: make this more general
+    # get image key from  first key pair
     image_key, label_key = wandb.config["dataset"]["key_pairs"][0]
     best_valid_loss = 1e9  # set to a large value to ensure first validation loss update
     nr_dice_classes = len(
