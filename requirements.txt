@@ -1,0 +1,4 @@
+qcardia-models @ git+https://github.com/q-cardIA/qcardia-models
+qcardia-data @ git+https://github.com/q-cardIA/qcardia-data
+seaborn>=0.13.2
+wandb>=0.17.4
