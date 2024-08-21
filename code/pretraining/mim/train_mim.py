@@ -99,10 +99,10 @@ def main():
     )
 
     model = UNet2d(
-        nr_input_channels=config["unet"]["nr_image_channels"],
-        channels_list=config["unet"]["channels_list"],
-        nr_output_classes=config["unet"]["nr_output_classes"],
-        nr_output_scales=config["unet"]["nr_output_scales"],
+        nr_input_channels=wandb.config["unet"]["nr_image_channels"],
+        channels_list=wandb.config["unet"]["channels_list"],
+        nr_output_classes=wandb.config["unet"]["nr_output_classes"],
+        nr_output_scales=wandb.config["unet"]["nr_output_scales"],
     ).to(device)
 
     optimizer = torch.optim.SGD(

@@ -65,14 +65,14 @@ def main():
 
     # get multiple config versions for global and local crops
     config_global_blur = update_config(
-        config,
-        {"data": config["global_data_update_blur"]},
+        wandb.config, {"data": wandb.config["global_data_update_blur"]}
     )
     config_global_solarize = update_config(
-        config,
-        {"data": config["global_data_update_solarize"]},
+        wandb.config, {"data": wandb.config["global_data_update_solarize"]}
     )
-    config_local = update_config(config, {"data": config["local_data_update"]})
+    config_local = update_config(
+        wandb.config, {"data": wandb.config["local_data_update"]}
+    )
     nr_local_crops = wandb.config["local_data_update"]["nr_sample_copies"] + 1
 
     # Get the path to the directory where the Weights & Biases run files are stored.
@@ -229,11 +229,11 @@ def main():
         train_loss = 0.0
 
         # use manuals seeds to sync dataloaders
-        torch.manual_seed(config["experiment"]["seed"] + epoch_nr)
+        torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
         global_data_blur_train_iter = iter(global_data_blur_train_dataloader)
-        torch.manual_seed(config["experiment"]["seed"] + epoch_nr)
+        torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
         global_data_solarize_train_iter = iter(global_data_solarize_train_dataloader)
-        torch.manual_seed(config["experiment"]["seed"] + epoch_nr)
+        torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
         local_data_train_iter = iter(local_data_train_dataloader)
         for batch_nr in range(len(local_data_train_dataloader)):
             x_global_blur = next(global_data_blur_train_iter)
