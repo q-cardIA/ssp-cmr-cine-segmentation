@@ -38,10 +38,9 @@ def main():
     # experiment. Additionally, it contains data preprocessing and augmentation
     # settings, paths to data and results, and wandb experiment parameters. Config file
     # path can be set as system argument, or defaults to a default config file.
-    config_path = Path(
-        "configs/baseline-config.yaml" if len(sys.argv) == 1 else sys.argv[1],
-    )
-    config = yaml.load(Path.open(config_path), Loader=yaml.FullLoader)
+    default_config_path = "configs/baseline-config.yaml"
+    config_path = Path(default_config_path if len(sys.argv) == 1 else sys.argv[1])
+    config = yaml.load(config_path.open(), Loader=yaml.FullLoader)
 
     seed_everything(config["experiment"]["seed"])
 

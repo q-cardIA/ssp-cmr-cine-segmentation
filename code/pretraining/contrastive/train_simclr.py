@@ -36,14 +36,9 @@ def main():
     # experiment. Additionally, it contains data preprocessing and augmentation
     # settings, paths to data and results, and wandb experiment parameters. Config file
     # path can be set as system argument, or defaults to a default config file.
-    config_path = Path(
-        (
-            r"C:\Users\rob_d\GitHub\ssp-cmr-cine-segmentation\configs/simclr-config.yaml"
-            if len(sys.argv) == 1
-            else sys.argv[1]
-        ),
-    )
-    config = yaml.load(Path.open(config_path), Loader=yaml.FullLoader)
+    default_config_path = "configs/simclr-config.yaml"
+    config_path = Path(default_config_path if len(sys.argv) == 1 else sys.argv[1])
+    config = yaml.load(config_path.open(), Loader=yaml.FullLoader)
 
     seed_everything(config["experiment"]["seed"])
 
