@@ -160,7 +160,6 @@ def main():
                 # with mask values instead of default loss function mean reduction
                 # (loss function uses sum reduction)
                 loss = loss_function(outputs * mask, targets * mask) / mask.sum()
-                print(loss.item(), end="\t")
 
             scaler.scale(loss).backward()  # backpropagate loss
             scaler.step(optimizer)  # update weights
