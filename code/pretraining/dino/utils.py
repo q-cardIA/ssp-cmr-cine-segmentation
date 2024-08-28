@@ -7,6 +7,12 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+"""
+Some of the code in this file is based on/adapted from the facebook (meta) research DINO
+repository, licensed under the Apache License 2.0:
+https://github.com/facebookresearch/dino/blob/main/LICENSE
+"""
+
 
 def update_config(config, update_dict):
     config = deepcopy(config)
