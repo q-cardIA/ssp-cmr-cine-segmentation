@@ -131,7 +131,9 @@ def main():
         device = torch.device("mps")  # MacOS
     else:
         device = torch.device("cpu")
-        warnings.warn("No GPU available; using CPU", stacklevel=1)
+        message = f"No GPU available; using CPU for run `{run.project}/{run.id}`"
+        warnings.warn(message, stacklevel=1)
+        run.alert(title="CPU training", text=message)
 
     # Definition of training and model settings based on the information in config yaml
     max_epochs = wandb.config["training"]["max_nr_epochs"]
