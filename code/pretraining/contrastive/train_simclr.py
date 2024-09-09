@@ -107,11 +107,10 @@ def main():
     # Definition of training and model settings based on the information in config yaml
     max_epochs = wandb.config["training"]["max_nr_epochs"]
 
-    ntxent_threshold = wandb.config["loss"]["ntxent_supervised_threshold"]
     loss_function = NTXentLoss(
         temperature=wandb.config["loss"]["ntxent_temperature"],
-        threshold=None if ntxent_threshold.lower() == "none" else ntxent_threshold,
-        cyclic_relative_labels=wandb.config["loss"]["ntxent_supervised_cyclic_labels"],
+        threshold=None,
+        cyclic_relative_labels=False,
     )
     encoder_model = EncoderMLP2d(
         nr_input_channels=wandb.config["encoder"]["nr_image_channels"],
