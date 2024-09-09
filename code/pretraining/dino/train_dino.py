@@ -62,16 +62,16 @@ def main():
         # mode="offline",
     )
 
-    # get multiple config versions for global and local crops
+    # get multiple config versions for global and local crops, updating the base config
+    # with the global and local data augmentation settings specified in the config yaml
+    # (does not use wandb.config directly to avoid recursion errors)
     config_global_blur = update_config(
-        wandb.config, {"data": wandb.config["global_data_update_blur"]}
+        config, {"data": wandb.config["global_data_update_blur"]}
     )
     config_global_solarize = update_config(
-        wandb.config, {"data": wandb.config["global_data_update_solarize"]}
+        config, {"data": wandb.config["global_data_update_solarize"]}
     )
-    config_local = update_config(
-        wandb.config, {"data": wandb.config["local_data_update"]}
-    )
+    config_local = update_config(config, {"data": wandb.config["local_data_update"]})
     nr_local_crops = wandb.config["local_data_update"]["nr_sample_copies"] + 1
 
     # Get the path to the directory where the Weights & Biases run files are stored.
