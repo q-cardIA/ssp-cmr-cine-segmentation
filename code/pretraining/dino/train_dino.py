@@ -214,7 +214,7 @@ def main():
         max_epochs,
         len(local_data_train_dataloader),
     )
-    # momentum parameter is increased to 1. during training with a cosine schedule
+    # momentum parameter is increased to 1.0 during training with a cosine schedule
     momentum_schedule = cosine_scheduler(
         wandb.config["optimizer"]["momentum_teacher"],
         1.0,
@@ -222,7 +222,7 @@ def main():
         len(local_data_train_dataloader),
     )
 
-    # get image key from  first key pair
+    # get image key from first key pair
     image_key, _ = wandb.config["dataset"]["key_pairs"][0]
     best_epoch_training_loss = 1e9
     use_amp = wandb.config["training"]["mixed_precision"]
@@ -233,7 +233,7 @@ def main():
     for epoch_nr in range(max_epochs):
         train_loss = 0.0
 
-        # use manuals seeds to sync dataloaders
+        # use manual seeds to sync dataloaders
         torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
         global_data_blur_train_iter = iter(global_data_blur_train_dataloader)
         torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
@@ -248,7 +248,7 @@ def main():
                 x_global_blur["meta_dict"]["file_id"],
                 x_global_solarize["meta_dict"]["file_id"],
                 x_local["meta_dict"]["file_id"][::nr_local_crops],
-            )  # make sure dataloaders are properly synced (set num_workers > 0)
+            )  # make sure dataloaders are properly synced (requires num_workers > 0)
 
             with torch.autocast(device.type, torch.float16, enabled=use_amp):
                 imgs_global = torch.concat(
@@ -262,7 +262,7 @@ def main():
 
                 loss = dino_loss(student_outputs, teacher_outputs, epoch_nr)
 
-            # update weight decay and learning rate according to their schedule
+            # update weight decay and learning rate according to their schedules
             for i, param_group in enumerate(optimizer.param_groups):
                 param_group["lr"] = lr_schedule[step]
                 if i == 0:  # only the first group is regularized
