@@ -53,7 +53,7 @@ def main():
         id=f'{wandb.util.generate_id()}_{config["experiment"]["name"]}',
         config=config,
         save_code=True,
-        mode="offline",
+        # mode="offline",
     )
 
     # Get the path to the directory where the Weights & Biases run files are stored.
