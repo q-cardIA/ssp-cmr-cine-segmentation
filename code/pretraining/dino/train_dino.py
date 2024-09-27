@@ -10,10 +10,10 @@ example usage:
 """
 
 import sys
+import warnings
 from datetime import datetime
 from pathlib import Path
 from shutil import copy2
-from warnings import warn
 
 import qcardia_data
 import qcardia_models
@@ -62,16 +62,16 @@ def main():
         # mode="offline",
     )
 
-    # get multiple config versions for global and local crops
+    # get multiple config versions for global and local crops, updating the base config
+    # with the global and local data augmentation settings specified in the config yaml
+    # (does not use wandb.config directly to avoid recursion errors)
     config_global_blur = update_config(
-        wandb.config, {"data": wandb.config["global_data_update_blur"]}
+        config, {"data": wandb.config["global_data_update_blur"]}
     )
     config_global_solarize = update_config(
-        wandb.config, {"data": wandb.config["global_data_update_solarize"]}
+        config, {"data": wandb.config["global_data_update_solarize"]}
     )
-    config_local = update_config(
-        wandb.config, {"data": wandb.config["local_data_update"]}
-    )
+    config_local = update_config(config, {"data": wandb.config["local_data_update"]})
     nr_local_crops = wandb.config["local_data_update"]["nr_sample_copies"] + 1
 
     # Get the path to the directory where the Weights & Biases run files are stored.
@@ -125,9 +125,15 @@ def main():
 
     # Set up the device, loss function, model, optimizer, learning rate scheduler, and
     # early stopper. The device is set to GPU if available, otherwise CPU is used.
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if not torch.cuda.is_available():
-        warn("No GPU available; using CPU", stacklevel=1)
+    if torch.cuda.is_available():
+        device = torch.device("cuda")  # Windows/Linux
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")  # MacOS
+    else:
+        device = torch.device("cpu")
+        message = f"No GPU available; using CPU for run `{run.project}/{run.id}`"
+        warnings.warn(message, stacklevel=1)
+        run.alert(title="CPU training", text=message)
 
     # Definition of training and model settings based on the information in config yaml
     max_epochs = wandb.config["training"]["max_nr_epochs"]
@@ -208,7 +214,7 @@ def main():
         max_epochs,
         len(local_data_train_dataloader),
     )
-    # momentum parameter is increased to 1. during training with a cosine schedule
+    # momentum parameter is increased to 1.0 during training with a cosine schedule
     momentum_schedule = cosine_scheduler(
         wandb.config["optimizer"]["momentum_teacher"],
         1.0,
@@ -216,7 +222,7 @@ def main():
         len(local_data_train_dataloader),
     )
 
-    # get image key from  first key pair
+    # get image key from first key pair
     image_key, _ = wandb.config["dataset"]["key_pairs"][0]
     best_epoch_training_loss = 1e9
     use_amp = wandb.config["training"]["mixed_precision"]
@@ -227,7 +233,7 @@ def main():
     for epoch_nr in range(max_epochs):
         train_loss = 0.0
 
-        # use manuals seeds to sync dataloaders
+        # use manual seeds to sync dataloaders
         torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
         global_data_blur_train_iter = iter(global_data_blur_train_dataloader)
         torch.manual_seed(wandb.config["experiment"]["seed"] + epoch_nr)
@@ -242,7 +248,7 @@ def main():
                 x_global_blur["meta_dict"]["file_id"],
                 x_global_solarize["meta_dict"]["file_id"],
                 x_local["meta_dict"]["file_id"][::nr_local_crops],
-            )  # make sure dataloaders are properly synced (set num_workers > 0)
+            )  # make sure dataloaders are properly synced (requires num_workers > 0)
 
             with torch.autocast(device.type, torch.float16, enabled=use_amp):
                 imgs_global = torch.concat(
@@ -256,7 +262,7 @@ def main():
 
                 loss = dino_loss(student_outputs, teacher_outputs, epoch_nr)
 
-            # update weight decay and learning rate according to their schedule
+            # update weight decay and learning rate according to their schedules
             for i, param_group in enumerate(optimizer.param_groups):
                 param_group["lr"] = lr_schedule[step]
                 if i == 0:  # only the first group is regularized

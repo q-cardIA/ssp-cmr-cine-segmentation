@@ -136,8 +136,6 @@ mlp:
 
 loss:
   ntxent_temperature: 0.1
-  ntxent_supervised_threshold: None
-  ntxent_supervised_cyclic_labels: False
 
 
 optimizer:

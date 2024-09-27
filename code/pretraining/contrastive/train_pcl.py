@@ -10,10 +10,10 @@ example usage:
 """
 
 import sys
+import warnings
 from datetime import datetime
 from pathlib import Path
 from shutil import copy2
-from warnings import warn
 
 import qcardia_data
 import qcardia_models
@@ -94,9 +94,15 @@ def main():
 
     # Set up the device, loss function, model, optimizer, learning rate scheduler, and
     # early stopper. The device is set to GPU if available, otherwise CPU is used.
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if not torch.cuda.is_available():
-        warn("No GPU available; using CPU", stacklevel=1)
+    if torch.cuda.is_available():
+        device = torch.device("cuda")  # Windows/Linux
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")  # MacOS
+    else:
+        device = torch.device("cpu")
+        message = f"No GPU available; using CPU for run `{run.project}/{run.id}`"
+        warnings.warn(message, stacklevel=1)
+        run.alert(title="CPU training", text=message)
 
     # Definition of training and model settings based on the information in config yaml
     max_epochs = wandb.config["training"]["max_nr_epochs"]
