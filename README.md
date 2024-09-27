@@ -66,3 +66,17 @@ More details can be found in the `qcardia-data` [demo](https://github.com/q-card
 
 #### Training
 Afterwards, the training scripts should work out of the box. The [train_unet](code/train_unet.py) script trains a U-Net based on the [baseline-config](configs/baseline-config.yaml) configuration file. Similarly, there are training scripts for SimCLR, PCL, DINO, and MIM pretraining, using their respective config files. ***Note that the data path should be updated in each config file.***
+
+## Citation
+If you find our work useful in your research please consider citing our paper:
+```
+@misc{demooij2024ssp,
+      title={Self-supervised Pretraining for Cardiovascular Magnetic Resonance Cine Segmentation, 
+      author={Rob A. J. de Mooij and Josien P. W. Pluim and Cian M. Scannell},
+      year={2024},
+      eprint={2409.18100},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2409.18100}, 
+}
+```
