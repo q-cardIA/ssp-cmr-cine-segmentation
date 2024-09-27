@@ -36,7 +36,7 @@ data
     │   │   │   ├── A0S9V9_sa_gt.nii.gz
     │   │   │   └── A0S9V9_sa.nii.gz
     │   │   └── ...
-    │   └── dataset_information.csv
+    │   └── 211230_M&Ms_Dataset_information_diagnosis_opendataset.csv
     ├── MnM2
     │   ├── dataset
     │   │   ├── 001
